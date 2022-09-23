@@ -1,4 +1,4 @@
-package com.example.stomp;
+package com.Stomp;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
