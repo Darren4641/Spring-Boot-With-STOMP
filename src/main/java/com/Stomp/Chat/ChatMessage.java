@@ -5,17 +5,29 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.sql.Timestamp;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatMessage {
-    public enum MessageType {
-        ENTER, TALK
-    }
 
     private MessageType type;
     private String roomId;
     private String sender;
     private String message;
+    private Timestamp createDate;
+
+    @AllArgsConstructor
+    @Getter
+    public enum MessageType {
+        ENTER("ENTER"),
+        TALK("TALK");
+
+        private String value;
+        public static MessageType from(String s) {
+            return MessageType.valueOf(s.toUpperCase());
+        }
+    }
 }

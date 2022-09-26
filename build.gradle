@@ -26,7 +26,8 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-jdbc', version: '2.5.2'
+    runtimeOnly 'mysql:mysql-connector-java'
     //websocket
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation 'org.webjars:sockjs-client:1.1.2'
