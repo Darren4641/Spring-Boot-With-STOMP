@@ -3,6 +3,7 @@ package com.Stomp.Chat;
 import com.Stomp.Chat.Repository.chatRoom.ChatRoomRepository;
 import com.Stomp.Chat.Repository.chatRoom.ChatRoomRepositoryImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -15,18 +16,14 @@ public class ChatService {
     private Map<String, ChatRoom> chatRooms;
     private ChatRoomRepository chatRoomRepository;
 
+    @Autowired
     public ChatService(ChatRoomRepositoryImpl chatRoomRepository) {
         this.chatRoomRepository = chatRoomRepository;
     }
 
     @PostConstruct
     private void init() {
-
         chatRooms = new HashMap<String, ChatRoom>();
-        List<ChatRoom> list = chatRoomRepository.findAll();
-        for(ChatRoom item : list) {
-            chatRooms.put(item.getRoomId(), item);
-        }
     }
 
     //채팅방 전체 불러오기
@@ -46,6 +43,7 @@ public class ChatService {
         ChatRoom chatRoom = ChatRoom.create(name);
         chatRoomRepository.save(chatRoom);
         chatRooms.put(chatRoom.getRoomId(), chatRoom);
+
         return chatRoom;
     }
 }

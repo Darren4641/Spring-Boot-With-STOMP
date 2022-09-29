@@ -11,7 +11,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/chat")
 public class ChatRoomController {
+    public static final int SHOW_COUNT = 10;
     private final ChatService chatService;
+    private final MessageService messageService;
 
     //채팅 리스트
     @GetMapping("/room")
@@ -35,9 +37,16 @@ public class ChatRoomController {
 
     //채팅방 입장
     @GetMapping("/room/enter/{roomId}")
-    public String roomDetail(Model model, @PathVariable String roomId) {
-        model.addAttribute("roomId", roomId);
+    public String roomDetail(@PathVariable String roomId) {
         return "/chat/roomdetail";
+    }
+
+    @GetMapping("/chatlog/{page}")
+    public List<ChatMessage> getChatLog(@PathVariable(name = "page") int pageNum) {
+        //무한 스크롤
+        int limit = getLimitCnt(pageNum);
+        int offset = limit - 10;
+        return messageService.setChatLog(limit, offset, pageNum);
     }
 
     //채팅방 검색
@@ -45,6 +54,15 @@ public class ChatRoomController {
     @ResponseBody
     public ChatRoom roomInfo(@PathVariable String roomId) {
         return chatService.findById(roomId);
+    }
+
+    private int getLimitCnt(int pageNum) {
+        int limit = SHOW_COUNT;
+        for(int i = 0; i <= pageNum; i++) {
+            if(i != 0)
+                limit += SHOW_COUNT;
+        }
+        return limit;
     }
 
 }

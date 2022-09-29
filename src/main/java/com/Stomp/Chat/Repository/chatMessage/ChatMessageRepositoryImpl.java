@@ -21,8 +21,7 @@ public class ChatMessageRepositoryImpl implements  ChatMessageRepository{
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public String save(ChatMessage chatMessage) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
+    public void save(ChatMessage chatMessage) {
         PreparedStatementCreator preparedStatementCreator = (connection) -> {
             PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO `carrotsql`.`chatMessage`(`type`,`roomId`,`sender`,`message`,`createDate`)" +
                     "VALUES (?,?,?,?,?)");
@@ -34,8 +33,7 @@ public class ChatMessageRepositoryImpl implements  ChatMessageRepository{
 
             return preparedStatement;
         };
-        jdbcTemplate.update(preparedStatementCreator, keyHolder);
-        return keyHolder.getKey().toString();
+        jdbcTemplate.update(preparedStatementCreator);
     }
 
     @Override
@@ -49,13 +47,14 @@ public class ChatMessageRepositoryImpl implements  ChatMessageRepository{
                 "SELECT `chatMessage`.`type`," +
                         "`chatMessage`.`roomId`," +
                         "`chatMessage`.`sender`," +
-                        "`chatMessage`.`message`" +
+                        "`chatMessage`.`message`," +
+                        "`chatMessage`.`createDate`" +
                         "FROM `carrotsql`.`chatMessage` ORDER BY `createDate` DESC LIMIT ? OFFSET ?",
                 new RowMapper<ChatMessage>() {
                     @Override
                     public ChatMessage mapRow(ResultSet rs, int rowNum) throws SQLException {
                         ChatMessage chatMessage = new ChatMessage(
-                                rs.getObject("type", ChatMessage.MessageType.class),
+                                ChatMessage.MessageType.from(rs.getString("type")),
                                 rs.getString("roomId"),
                                 rs.getString("sender"),
                                 rs.getString("message"),

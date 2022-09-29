@@ -20,18 +20,18 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository{
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public String save(ChatRoom chatRoom) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
+    public void save(ChatRoom chatRoom) {
+        
         PreparedStatementCreator preparedStatementCreator = (connection) -> {
             PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO `carrotsql`.`chatRoom` (`roomId`, `roomName`) " +
-                    "VALUES (?,?)", new String[]{"roomId"});
+                    "VALUES (?,?)");
             preparedStatement.setString(1, chatRoom.getRoomId());
             preparedStatement.setString(2, chatRoom.getRoomName());
 
             return preparedStatement;
         };
-        jdbcTemplate.update(preparedStatementCreator, keyHolder);
-        return keyHolder.getKey().toString();
+        jdbcTemplate.update(preparedStatementCreator);
+
     }
 
     @Override
@@ -41,14 +41,20 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository{
 
     @Override
     public List<ChatRoom> findAll() {
-        return jdbcTemplate.query(
-                "SELECT `chatRoom`.`roomId`, `chatRoom`.`roomName` FROM `carrotsql`.`chatRoom`",
-                (rs, rowNum) ->
-                        new ChatRoom(
-                                rs.getString("roomId"),
-                                rs.getString("roomName")
-                        )
-        );
+        try {
+            return jdbcTemplate.query(
+                    "SELECT `chatRoom`.`roomId`, `chatRoom`.`roomName` FROM `carrotsql`.`chatRoom`",
+                    (rs, rowNum) ->
+                            new ChatRoom(
+                                    rs.getString("roomId"),
+                                    rs.getString("roomName")
+                            )
+            );
+        }catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     @Override
