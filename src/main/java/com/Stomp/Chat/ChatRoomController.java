@@ -5,7 +5,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -21,18 +23,24 @@ public class ChatRoomController {
         return "/chat/room";
     }
 
+    @GetMapping("/")
+    public String index() {
+        return "index";
+    }
+
     //모든 채팅방
     @GetMapping("/rooms")
     @ResponseBody
-    public List<ChatRoom> room() {
-        return chatService.findAllRoom();
+    public List<ChatRoom> room(String id) {
+        System.out.println("id : " +  id);
+        return chatService.findAllRoom(id);
     }
 
     //채팅방 생성
     @PostMapping("/room")
     @ResponseBody
-    public ChatRoom createRoom(@RequestParam String name) {
-        return chatService.createRoom(name);
+    public ChatRoom createRoom(@RequestBody Map<String, Object> params) {
+        return chatService.createRoom(params.get("id").toString(), params.get("name").toString());
     }
 
     //채팅방 입장
@@ -41,19 +49,20 @@ public class ChatRoomController {
         return "/chat/roomdetail";
     }
 
-    @GetMapping("/chatlog/{page}")
-    public List<ChatMessage> getChatLog(@PathVariable(name = "page") int pageNum) {
+    @GetMapping("/chatlog/{roomId}/{page}")
+    public List<ChatMessage> getChatLog(@PathVariable(name = "roomId") String roomId, @PathVariable(name = "page") int pageNum) {
         //무한 스크롤
         int limit = getLimitCnt(pageNum);
         int offset = limit - 10;
-        return messageService.setChatLog(limit, offset, pageNum);
+        //local Storage에서 데이터 가져오기
+        return messageService.setChatLog(roomId, limit, offset);
     }
 
     //채팅방 검색
     @GetMapping("/room/{roomId}")
     @ResponseBody
-    public ChatRoom roomInfo(@PathVariable String roomId) {
-        return chatService.findById(roomId);
+    public ChatRoom roomInfo(@PathVariable String id, @PathVariable String roomId) {
+        return chatService.findById(id, roomId);
     }
 
     private int getLimitCnt(int pageNum) {

@@ -20,7 +20,7 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository{
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public void save(ChatRoom chatRoom) {
+    public void saveChatRoom(ChatRoom chatRoom) {
         
         PreparedStatementCreator preparedStatementCreator = (connection) -> {
             PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO `carrotsql`.`chatRoom` (`roomId`, `roomName`) " +
@@ -35,20 +35,37 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository{
     }
 
     @Override
+    public void saveChatUser(String roomId, String id) {
+        PreparedStatementCreator preparedStatementCreator = (connection) -> {
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO `chatRoomUser` values(?,?,1)");
+            preparedStatement.setString(1, roomId);
+            preparedStatement.setString(2, id);
+
+            return preparedStatement;
+        };
+        jdbcTemplate.update(preparedStatementCreator);
+    }
+
+    @Override
     public void deleteByRoomId(String roomId) {
         jdbcTemplate.update("DELETE FROM `carrotsql`.`chatRoom` WHERE ?", roomId);
     }
 
     @Override
-    public List<ChatRoom> findAll() {
+    public List<ChatRoom> findAll(String id) {
         try {
             return jdbcTemplate.query(
-                    "SELECT `chatRoom`.`roomId`, `chatRoom`.`roomName` FROM `carrotsql`.`chatRoom`",
+                    "select chatroom.roomId, chatroom.roomName, chatuser.isRead " +
+                            "from chatroom " +
+                            "join chatroomuser as chatuser " +
+                            "on chatroom.roomId = chatuser.roomId " +
+                            "where chatuser.id = ? ",
+                    new Object[]{id},
                     (rs, rowNum) ->
-                            new ChatRoom(
-                                    rs.getString("roomId"),
-                                    rs.getString("roomName")
-                            )
+                            ChatRoom.builder()
+                                    .roomId(rs.getString("roomId"))
+                                    .roomName(rs.getString("roomName"))
+                                    .isRead(rs.getInt("isRead")).build()
             );
         }catch (NullPointerException e) {
             e.printStackTrace();
@@ -58,16 +75,40 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository{
     }
 
     @Override
-    public Optional<ChatRoom> findByRoomId(String roomId) {
+    public Optional<String> findById(String id, String roomId) {
         try {
             return jdbcTemplate.queryForObject(
-                    "SELECT `chatRoom`.`roomId`,`chatRoom`.`roomName` FROM `carrotsql`.`chatRoom` WHERE `roomId` = ?",
-                    new Object[]{roomId},
+                    "select id " +
+                            "from chatroomuser " +
+                            "where id = '?' and roomId = ? limit 1 ",
+                    new Object[]{id, roomId},
                     (rs, rowNum) ->
-                            Optional.of(new ChatRoom(
-                                    rs.getString("roomId"),
-                                    rs.getString("roomName")
-                            ))
+                            Optional.of(
+                                    rs.getString("id")
+                            )
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public Optional<ChatRoom> findByRoomId(String id, String roomId) {
+        try {
+            return jdbcTemplate.queryForObject(
+                    "select chatroom.roomId, chatroom.roomName, chatuser.isRead " +
+                            "from chatroom " +
+                            "join chatroomuser as chatuser " +
+                            "on chatroom.roomId = chatuser.roomId " +
+                            "where chatuser.id = ? and chatroom.roomId = ? ",
+                    new Object[]{id, roomId},
+                    (rs, rowNum) ->
+                            Optional.of(
+                                    ChatRoom.builder()
+                                            .roomId(rs.getString("roomId"))
+                                            .roomName(rs.getString("roomName"))
+                                            .isRead(rs.getInt("isRead")).build()
+                            )
             );
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();

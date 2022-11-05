@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,21 +20,36 @@ public class MessageController {
 
     //Config 파일에서 setApplicationDestinationPrefixes를 "/app"으로 해주었기때문에 실제
     //경로는 "/app/chat/message"이다.
-    @MessageMapping("/chat/message")
-    public void enter(ChatMessage message) {
-        if(ChatMessage.MessageType.ENTER.equals(message.getType())) {
-            message.setMessage(message.getSender() + "님이 입장하셨습니다.");
-        }
-        sendingOperations.convertAndSend("/topic/chat/room/"+message.getRoomId(), message);
-        messageService.sendMessage(message);
+    @MessageMapping("/chat/enter")
+    public ChatMessage enter(ChatMessage chatMessage) {
+//        String id = params.get("id").toString();
+//        String roomId = params.get("roomId").toString();
+//        String message = "";
+//        if(ChatMessage.MessageType.ENTER.equals(params.get("type").toString())) {
+//            if(messageService.validateChatRoom(id, roomId))
+//                message = id + "님이 입장하셨습니다.";
+//        }
+//
+//        if(params.get("message").toString() != null) {
+//            message = params.get("message").toString();
+//        }
+//        sendingOperations.convertAndSend("/topic/chat/room/"+roomId, message);
+        sendingOperations.convertAndSend("/topic/public", chatMessage);
+        return chatMessage;
     }
 
-    @GetMapping("/chatlog/{page}")
-    public List<ChatMessage> getChatLog(@PathVariable(name = "page") int pageNum) {
+    @MessageMapping("/chat/message")
+    public ChatMessage sendMessage(ChatMessage chatMessage) {
+        sendingOperations.convertAndSend("/topic/public", chatMessage);
+        return chatMessage;
+    }
+
+    @GetMapping("/chatlog/{roomId}/{page}")
+    public List<ChatMessage> getChatLog(@PathVariable(name = "roomId") String roomId, @PathVariable(name = "page") int pageNum) {
         //무한 스크롤
         int limit = getLimitCnt(pageNum);
         int offset = limit - 10;
-        return messageService.setChatLog(limit, offset, pageNum);
+        return messageService.setChatLog(roomId, limit, offset);
     }
 
     private int getLimitCnt(int pageNum) {

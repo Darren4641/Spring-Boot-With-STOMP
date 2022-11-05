@@ -1,18 +1,17 @@
 package com.Stomp.Chat;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.UUID;
 
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 public class ChatRoom {
     private String roomId;
     private String roomName;
+    private int isRead;
 
     public ChatRoom() {
 

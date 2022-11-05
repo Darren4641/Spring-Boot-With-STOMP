@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,21 +26,27 @@ public class ChatService {
     }
 
     //채팅방 전체 불러오기
-    public List<ChatRoom> findAllRoom() {
-        List<ChatRoom> result = chatRoomRepository.findAll();
-        Collections.reverse(result);
-        return result;
+    public List<ChatRoom> findAllRoom(String id) {
+        try {
+            List<ChatRoom> result = chatRoomRepository.findAll(id);
+            Collections.reverse(result);
+            return result;
+        } catch (Exception e ) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     //채팅방 불러오기
-    public ChatRoom findById(String roomId) {
+    public ChatRoom findById(String id, String roomId) {
         return chatRooms.get(roomId);
     }
 
     //채팅방 생성
-    public ChatRoom createRoom(String name) {
+    public ChatRoom createRoom(String id, String name) {
         ChatRoom chatRoom = ChatRoom.create(name);
-        chatRoomRepository.save(chatRoom);
+        chatRoomRepository.saveChatRoom(chatRoom);
+        chatRoomRepository.saveChatUser(chatRoom.getRoomId(), id);
         chatRooms.put(chatRoom.getRoomId(), chatRoom);
 
         return chatRoom;

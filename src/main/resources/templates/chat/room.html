@@ -42,6 +42,7 @@
         el: '#app',
         data: {
             room_name : '',
+            id : '',
             chatrooms: [
             ]
         },
@@ -50,35 +51,51 @@
         },
         methods: {
             findAllRoom: function() {
-                axios.get('/chat/rooms').then(response => { this.chatrooms = response.data; });
+                const queryString = window.location.search;
+                const urlParams = new URLSearchParams(queryString);
+                this.id = urlParams.get('id');
+                axios({
+                    url: 'http://localhost:8080/chat/rooms?id='+this.id,
+                    method: 'get',
+
+                }).then(
+                    response => { this.chatrooms = response.data; }
+                );
             },
             createRoom: function() {
+                const queryString = window.location.search;
+                const urlParams = new URLSearchParams(queryString);
                 if("" === this.room_name) {
                     alert("방 제목을 입력해 주십시요.");
                     return;
                 } else {
                     var params = new URLSearchParams();
-                    params.append("name",this.room_name);
-                    axios.post('/chat/room', params)
-                        .then(
-                            response => {
-                                alert(response.data.roomName+"방 개설에 성공하였습니다.")
-                                this.room_name = '';
-                                this.findAllRoom();
-                            }
-                        )
-                        .catch( response => { alert("채팅방 개설에 실패하였습니다."); } );
+                    var data = { "id" : this.id , "name" : this.room_name };
+                    axios({
+                        url: 'http://localhost:8080/chat/room',
+                        method: 'post',
+                        data : {
+                            'id' : localStorage.getItem("userId"),
+                            'name' : this.room_name
+                        }
+                    }).then(
+                             response => {
+                                 alert(response.data.roomName+"방 개설에 성공하였습니다.")
+                                 this.room_name = '';
+                                 this.findAllRoom();
+                             }
+                    ).catch( response => { alert("채팅방 개설에 실패하였습니다."); } );
                 }
             },
             enterRoom: function(roomId) {
-                var sender = prompt('대화명을 입력해 주세요.');
-                if(sender !== "") {
-                    localStorage.setItem('wschat.sender',sender);
+                    localStorage.setItem('wschat.id',this.id);
                     localStorage.setItem('wschat.roomId',roomId);
+                    console.log(this.id);
+                    console.log(roomId);
                     location.href="/chat/room/enter/"+roomId;
                 }
             }
-        }
+
     });
 </script>
 </body>

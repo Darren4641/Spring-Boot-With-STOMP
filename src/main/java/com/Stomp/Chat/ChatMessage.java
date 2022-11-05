@@ -16,14 +16,15 @@ public class ChatMessage {
     private MessageType type;
     private String roomId;
     private String sender;
-    private String message;
+    private String content;
     private Timestamp createDate;
 
     @AllArgsConstructor
     @Getter
     public enum MessageType {
         ENTER("ENTER"),
-        TALK("TALK");
+        TALK("TALK"),
+        LEAVE("LEAVE");
 
         private String value;
         public static MessageType from(String s) {
