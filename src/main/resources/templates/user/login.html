@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:v-on="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
   <title>Login</title>
-  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/user.css" />
 </head>
 <body>
 <div>
   <h1>로그인</h1>
-  <form action="/signup">
-    <input type="text" placeholder="아이디" class="in">
-    <input type="password" placeholder="비밀번호" class="in">
+  <form action="/login" method="post">
+    <input type="text" name="id" placeholder="아이디" class="in">
+    <input type="password" name="password" placeholder="비밀번호" class="in">
     <input type="submit" id="btn" value="로그인"><br>
   </form>
   <a href="#none">비밀번호를 잊어버리셨나요?</a>

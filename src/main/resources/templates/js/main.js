@@ -13,15 +13,13 @@ var colors = [
     '#2196F3', '#32c787', '#00BCD4', '#ff5652',
     '#ffc107', '#ff85af', '#ff9800', '#39bbb0'
 ]
-var roomId = null;
-function connect(myId, title) {
-    // username = document.querySelector('#name').value.trim();
-    username = myId;
-    setRoomId(title);
-    console.log(roomId);
+
+function connect(event) {
+    username = document.querySelector('#name').value.trim();
     localStorage.setItem('chatId', username);
     console.log(username);
     if(username) {
+        usernamePage.classList.add('hidden');
         chatPage.classList.remove('hidden');
 
         var socket = new SockJS('/ws/chat');
@@ -29,24 +27,17 @@ function connect(myId, title) {
 
         stompClient.connect({}, onConnected, onError);
     }
-    //event.preventDefault();
-}
-
-function setRoomId(title) {
-    this.roomId = title;
-}
-
-function getRoomId() {
-    return this.roomId;
+    event.preventDefault();
 }
 
 function onConnected() {
-    stompClient.subscribe('/topic/chat/room/'+ getRoomId(), onMessageReceived);
+    stompClient.subscribe('/topic/public', onMessageReceived);
     stompClient.send("/app/chat/enter",
         {},
-        JSON.stringify({sender: username, type: 'ENTER', content: "", roomId: getRoomId()})
+        JSON.stringify({sender: username, type: 'ENTER'})
     )
     connectingElement.classList.add('hidden');
+
 }
 
 function onError(error) {
@@ -60,8 +51,7 @@ function sendMessage(event) {
         var chatMessage = {
             sender: username,
             content: messageInput.value,
-            type: 'TALK',
-            roomId: getRoomId()
+            type: 'TALK'
         };
         stompClient.send("/app/chat/message", {}, JSON.stringify(chatMessage));
         messageInput.value = '';
@@ -70,8 +60,6 @@ function sendMessage(event) {
 }
 
 function onMessageReceived(payload) {
-    console.log("@@");
-    console.log(payload);
     var message = JSON.parse(payload.body);
     var messageDiv = document.createElement("div");
     var messageElement = document.createElement('li');
@@ -133,5 +121,5 @@ function getAvatarColor(messageSender) {
     return colors[index];
 }
 
-//usernameForm.addEventListener('submit', connect, true);
-messageForm.addEventListener('submit', sendMessage, true);
+usernameForm.addEventListener('submit', connect, true);
+messageForm.addEventListener('submit', sendMessage, true)

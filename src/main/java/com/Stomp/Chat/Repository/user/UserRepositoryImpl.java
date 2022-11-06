@@ -20,9 +20,10 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public void save(User user) {
         PreparedStatementCreator preparedStatementCreator = (connection) -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO `usertemp` values(?,?)");
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO `usertemp` values(?,?,?)");
             preparedStatement.setString(1, user.getId());
             preparedStatement.setString(2, user.getPassword());
+            preparedStatement.setString(3, user.getTitle());
 
             return preparedStatement;
         };
@@ -51,11 +52,12 @@ public class UserRepositoryImpl implements UserRepository {
     public List<User> findAll() {
         try {
             return jdbcTemplate.query(
-                    "select `id`, `password` from usertemp ",
+                    "select `id`, `password`, `title` from usertemp ",
                     (rs, rowNum) ->
                             User.builder()
                                     .id(rs.getString("id"))
-                                    .password(rs.getString("password")).build()
+                                    .password(rs.getString("password"))
+                                    .title(rs.getString("title")).build()
             );
         } catch(NullPointerException e) {
             e.printStackTrace();

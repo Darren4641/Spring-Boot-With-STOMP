@@ -34,13 +34,13 @@ public class MessageController {
 //            message = params.get("message").toString();
 //        }
 //        sendingOperations.convertAndSend("/topic/chat/room/"+roomId, message);
-        sendingOperations.convertAndSend("/topic/public", chatMessage);
+        sendingOperations.convertAndSend("/topic/chat/room/"+ chatMessage.getRoomId(), chatMessage);
         return chatMessage;
     }
 
     @MessageMapping("/chat/message")
     public ChatMessage sendMessage(ChatMessage chatMessage) {
-        sendingOperations.convertAndSend("/topic/public", chatMessage);
+        sendingOperations.convertAndSend("/topic/chat/room/"+ chatMessage.getRoomId(), chatMessage);
         return chatMessage;
     }
 

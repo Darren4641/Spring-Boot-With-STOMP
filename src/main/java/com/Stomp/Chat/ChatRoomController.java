@@ -5,7 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;
 
@@ -23,9 +23,13 @@ public class ChatRoomController {
         return "/chat/room";
     }
 
-    @GetMapping("/")
-    public String index() {
-        return "index";
+    @GetMapping("/chatting/{title}")
+    public String index(@PathVariable String title, HttpSession session, Model model) {
+        System.out.println("myId : " + session.getAttribute("myId"));
+        System.out.println("title = " + title);
+        model.addAttribute("myId", session.getAttribute("myId"));
+        model.addAttribute("title", title);
+        return "/user/index";
     }
 
     //모든 채팅방
